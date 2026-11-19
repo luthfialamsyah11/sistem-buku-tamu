@@ -1,0 +1,73 @@
+<ion-content class="login-content" [fullscreen]="true">
+  <div class="login-bg" aria-hidden="true">
+    <img src="assets/loginbg.jpg?v=2" alt="" class="login-bg-img" />
+  </div>
+
+  <div class="login-wrap">
+    <div class="brand">
+      <div class="brand-logo-wrap">
+        <img src="assets/logo.png" alt="Logo Tirta Tarum" class="brand-logo-img" />
+      </div>
+      <h1 class="brand-title">Tirta Tarum</h1>
+      <p class="brand-sub">Sistem Buku Tamu & Manajemen Ruang Rapat</p>
+    </div>
+
+    <div class="login-card">
+      <div class="input-field-group">
+        <div class="field-inner">
+          <span class="field-label">Email</span>
+          <input
+            type="email"
+            class="native-input"
+            placeholder="nama@kantor.com"
+            [(ngModel)]="email"
+            autocomplete="email"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+
+      <div class="input-field-group">
+        <div class="field-inner">
+          <span class="field-label">Password</span>
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            class="native-input password-native"
+            [class.is-masked]="!showPassword()"
+            placeholder="Masukkan password"
+            [(ngModel)]="password"
+            (keyup.enter)="submit()"
+            autocomplete="current-password"
+            spellcheck="false"
+          />
+        </div>
+        <button
+          type="button"
+          class="custom-eye-btn"
+          (click)="toggleShowPassword()"
+          [title]="showPassword() ? 'Sembunyikan password' : 'Lihat password'"
+          tabindex="-1"
+        >
+          <ion-icon [name]="showPassword() ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
+        </button>
+      </div>
+
+      <ion-button expand="block" [disabled]="loading()" (click)="submit()" class="login-submit-btn">
+        @if (loading()) {
+          <ion-spinner name="crescent" style="width: 22px; height: 22px;"></ion-spinner>
+        } @else {
+          Login
+        }
+      </ion-button>
+    </div>
+
+    <div class="login-footer">
+      <div class="footer-badge">
+        <img src="assets/logo.png" alt="Logo Tirta Tarum" class="footer-logo-img" />
+        <span>Perumdam Tirta Tarum</span>
+      </div>
+    </div>
+  </div>
+</ion-content>
+

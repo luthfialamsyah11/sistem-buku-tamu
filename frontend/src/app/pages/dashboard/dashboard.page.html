@@ -1,0 +1,149 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button
+        class="sidebar-toggle-btn"
+        (click)="openMenu()"
+        fill="clear"
+        color="dark"
+        title="Tampilkan / Sembunyikan Menu"
+      >
+        <ion-icon slot="icon-only" name="menu-outline" style="font-size: 26px;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Beranda</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-body">
+    <div class="hero">
+      <div class="hero-top">
+        <div class="hero-brand-badge">
+          <img src="assets/logo.png" alt="Logo Tirta Tarum" class="hero-logo-img" />
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="hero-greet">{{ sapaan }}</p>
+          <h2 class="hero-name">{{ auth.user()?.name }}</h2>
+          <p class="hero-dept">{{ auth.user()?.department || 'Staf Internal' }} &bull; {{ auth.user()?.email }}</p>
+        </div>
+        <span class="role-pill">{{ auth.user()?.role }}</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue"><ion-icon name="people-outline"></ion-icon></div>
+        <div>
+          <p class="stat-num">{{ data()?.visitors_today ?? 0 }}</p>
+          <p class="stat-lbl">Tamu Hari Ini</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green"><ion-icon name="checkmark-done-outline"></ion-icon></div>
+        <div>
+          <p class="stat-num">{{ data()?.visitors_active ?? 0 }}</p>
+          <p class="stat-lbl">Di Lokasi</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon amber"><ion-icon name="time-outline"></ion-icon></div>
+        <div>
+          <p class="stat-num">{{ data()?.meetings_pending ?? 0 }}</p>
+          <p class="stat-lbl">Rapat Menunggu</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon purple"><ion-icon name="business-outline"></ion-icon></div>
+        <div>
+          <p class="stat-num">{{ data()?.rooms_available ?? 0 }}</p>
+          <p class="stat-lbl">Ruang Tersedia</p>
+        </div>
+      </div>
+    </div>
+
+    @if (auth.canManageRooms() || auth.canManageUsers()) {
+      <div class="section-title">
+        <span>Akses Cepat</span>
+      </div>
+      <div class="admin-links">
+        @if (auth.canManageRooms()) {
+          <a class="quick-card" routerLink="/ruangan">
+            <ion-icon name="cube-outline"></ion-icon>
+            <span>Kelola Ruangan</span>
+          </a>
+        }
+        @if (auth.canManageUsers()) {
+          <a class="quick-card" routerLink="/pengguna">
+            <ion-icon name="people-circle-outline"></ion-icon>
+            <span>Kelola User</span>
+          </a>
+        }
+      </div>
+    }
+
+    <div class="dashboard-split">
+      <div class="dashboard-col">
+        <div class="section-title">
+          <span>Jadwal Rapat Hari Ini</span>
+          <a routerLink="/tabs/rapat">Lihat semua</a>
+        </div>
+
+        @for (m of data()?.today_meetings ?? []; track m.id) {
+          <div class="card">
+            <div class="card-row">
+              <div class="avatar">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="card-title">{{ m.title }}</h4>
+                <p class="card-subtitle">{{ m.room?.room_name }} &bull; {{ m.start_time | jam }} - {{ m.end_time | jam }}</p>
+              </div>
+              <span class="chip" [class]="meetingStatus[m.status].color">
+                {{ meetingStatus[m.status].label }}
+              </span>
+            </div>
+          </div>
+        } @empty {
+          <div class="card" style="text-align: center; color: var(--app-muted); font-size: 13px;">
+            Belum ada agenda rapat untuk hari ini.
+          </div>
+        }
+      </div>
+
+      <div class="dashboard-col">
+        <div class="section-title">
+          <span>Tamu Terbaru</span>
+          <a routerLink="/tabs/tamu">Lihat semua</a>
+        </div>
+
+        @for (v of data()?.recent_visitors ?? []; track v.id) {
+          <div class="card">
+            <div class="card-row">
+              <div class="avatar">{{ v.visitor_name | initials }}</div>
+              <div class="flex-1 min-w-0">
+                <h4 class="card-title">{{ v.visitor_name }}</h4>
+                <p class="card-subtitle">{{ v.company || 'Pribadi' }} &bull; Menemui {{ v.host_name || v.host?.name }}</p>
+              </div>
+              <span class="chip" [class]="visitorStatus[v.status].color">
+                {{ visitorStatus[v.status].label }}
+              </span>
+            </div>
+          </div>
+        } @empty {
+          <div class="card" style="text-align: center; color: var(--app-muted); font-size: 13px;">
+            Belum ada data kunjungan tamu.
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</ion-content>
+

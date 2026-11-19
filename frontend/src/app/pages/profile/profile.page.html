@@ -1,0 +1,82 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/akun"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Edit Profil & Password</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page-body">
+    <div class="profile-split">
+      <div class="profile-col">
+        <div class="section-title" style="margin-top: 4px;"><span>Edit Profil</span></div>
+        <div class="card">
+          <ion-input
+            class="field"
+            label="Nama Lengkap"
+            labelPlacement="stacked"
+            fill="outline"
+            [(ngModel)]="profile.name"
+          ></ion-input>
+
+          <ion-input
+            class="field"
+            label="Email"
+            labelPlacement="stacked"
+            fill="outline"
+            type="email"
+            [(ngModel)]="profile.email"
+          ></ion-input>
+
+          <div class="field-row">
+            <ion-input
+              class="field"
+              label="No. Telepon"
+              labelPlacement="stacked"
+              fill="outline"
+              [(ngModel)]="profile.phone"
+            ></ion-input>
+
+            <ion-input
+              class="field"
+              label="Departemen"
+              labelPlacement="stacked"
+              fill="outline"
+              [(ngModel)]="profile.department"
+            ></ion-input>
+          </div>
+
+          <ion-button expand="block" (click)="saveProfile()">Simpan Profil</ion-button>
+        </div>
+      </div>
+
+      <div class="profile-col">
+        <div class="section-title" style="margin-top: 4px;"><span>Ganti Password</span></div>
+        <div class="card">
+          <ion-input
+            class="field"
+            label="Password Lama"
+            labelPlacement="stacked"
+            fill="outline"
+            type="password"
+            [(ngModel)]="pwd.current_password"
+          ></ion-input>
+
+          <ion-input
+            class="field"
+            label="Password Baru (Min. 6 karakter)"
+            labelPlacement="stacked"
+            fill="outline"
+            type="password"
+            [(ngModel)]="pwd.new_password"
+          ></ion-input>
+
+          <ion-button expand="block" fill="outline" (click)="changePassword()">Perbarui Password</ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+

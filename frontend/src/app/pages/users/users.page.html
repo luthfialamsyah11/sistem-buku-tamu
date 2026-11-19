@@ -1,0 +1,133 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/akun"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Kelola User</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="primary" (click)="openForm()">
+        <ion-icon name="person-add-outline" slot="start"></ion-icon>
+        Tambah
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      class="app-search"
+      placeholder="Cari nama atau email pengguna..."
+      [debounce]="250"
+      [(ngModel)]="search"
+      (ionInput)="load()"
+    ></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page-body">
+    <div class="card-grid">
+      @for (u of users(); track u.id) {
+        <div class="card">
+          <div class="card-row">
+            <div class="avatar">{{ u.name | initials }}</div>
+            <div class="flex-1 min-w-0">
+              <h3 class="card-title">{{ u.name }}</h3>
+              <p class="card-subtitle">{{ u.email }}{{ u.phone ? ' &bull; ' + u.phone : '' }}</p>
+            </div>
+            <span class="chip" [class]="u.role === 'admin' ? 'primary' : (u.role === 'sekretaris' ? 'warning' : 'success')">
+              {{ u.role }}
+            </span>
+          </div>
+
+          <div class="card-actions">
+            <ion-button fill="outline" color="primary" size="small" (click)="openForm(u)">
+              <ion-icon name="create-outline" slot="start"></ion-icon>
+              Edit
+            </ion-button>
+            <ion-button fill="outline" color="danger" size="small" (click)="remove(u)">
+              <ion-icon name="trash-outline" slot="start"></ion-icon>
+              Hapus
+            </ion-button>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <h3>Belum Ada Pengguna</h3>
+          <p>Klik tombol Tambah di kanan atas untuk membuat akun user baru.</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <ion-modal [isOpen]="modalOpen()" (didDismiss)="modalOpen.set(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ editingId() ? 'Edit Pengguna' : 'Tambah Pengguna' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modalOpen.set(false)">Tutup</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <ion-input
+          class="field"
+          label="Nama Lengkap *"
+          labelPlacement="stacked"
+          fill="outline"
+          [(ngModel)]="form.name"
+        ></ion-input>
+
+        <ion-input
+          class="field"
+          label="Email *"
+          labelPlacement="stacked"
+          fill="outline"
+          type="email"
+          [(ngModel)]="form.email"
+        ></ion-input>
+
+        <ion-input
+          class="field"
+          [label]="editingId() ? 'Password Baru (Kosongkan bila tidak diganti)' : 'Password *'"
+          labelPlacement="stacked"
+          fill="outline"
+          type="password"
+          [(ngModel)]="form.password"
+        ></ion-input>
+
+        <ion-input
+          class="field"
+          label="No. Telepon"
+          labelPlacement="stacked"
+          fill="outline"
+          type="tel"
+          placeholder="08xxxxxxxxxx"
+          [(ngModel)]="form.phone"
+        ></ion-input>
+
+        <ion-select
+          class="field"
+          label="Role Akses"
+          labelPlacement="stacked"
+          fill="outline"
+          [(ngModel)]="form.role"
+        >
+          <ion-select-option value="admin">Admin</ion-select-option>
+          <ion-select-option value="resepsionis">Resepsionis</ion-select-option>
+          <ion-select-option value="sekretaris">Sekretaris</ion-select-option>
+        </ion-select>
+      </ion-content>
+
+      <ion-footer class="form-footer">
+        <ion-toolbar>
+          <ion-button expand="block" (click)="save()">Simpan Pengguna</ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+

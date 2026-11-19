@@ -1,0 +1,191 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button
+        class="sidebar-toggle-btn"
+        (click)="openMenu()"
+        fill="clear"
+        color="dark"
+        title="Tampilkan / Sembunyikan Menu"
+      >
+        <ion-icon slot="icon-only" name="menu-outline" style="font-size: 26px;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Akun Saya</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="page-body">
+    <div class="account-split" [class.no-menu]="!auth.canManageRooms() && !auth.canManageUsers()">
+      <div class="account-col">
+        <div class="card">
+          <div class="profile-hero">
+            <div class="big-avatar">{{ auth.user()?.name | initials }}</div>
+            <div class="flex-1 min-w-0">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <h3 class="card-title" style="font-size: 18px; margin: 0;">{{ auth.user()?.name }}</h3>
+                <span class="status-active-pill">
+                  <span class="dot"></span> Aktif
+                </span>
+              </div>
+              <p class="card-subtitle" style="margin-top: 4px;">
+                {{ auth.user()?.department || 'Staf Internal' }} &bull; {{ auth.user()?.email }}
+              </p>
+              <div style="margin-top: 8px;">
+                <span
+                  class="profile-role-badge"
+                  [class.admin]="auth.isAdmin()"
+                  [class.resepsionis]="auth.isResepsionis()"
+                  [class.sekretaris]="auth.isSekretaris()"
+                >
+                  @if (auth.isAdmin()) {
+                    Administrator
+                  } @else if (auth.isResepsionis()) {
+                    Resepsionis
+                  } @else {
+                    Sekretaris
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <span>Informasi Profil Saya</span>
+        </div>
+
+        <div class="card">
+          <div class="info-list">
+            <div class="info-row">
+              <div class="info-label">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>Nama Lengkap</span>
+              </div>
+              <div class="info-value">{{ auth.user()?.name }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">
+                <ion-icon name="mail-outline"></ion-icon>
+                <span>Alamat Email</span>
+              </div>
+              <div class="info-value">{{ auth.user()?.email }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">
+                <ion-icon name="call-outline"></ion-icon>
+                <span>No. Telepon / WA</span>
+              </div>
+              <div class="info-value">
+                {{ auth.user()?.phone || 'Belum diisi' }}
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">
+                <ion-icon name="business-outline"></ion-icon>
+                <span>Departemen / Bagian</span>
+              </div>
+              <div class="info-value">
+                {{ auth.user()?.department || 'Umum & Operasional' }}
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">
+                <ion-icon name="shield-outline"></ion-icon>
+                <span>Peran / Role</span>
+              </div>
+              <div class="info-value">
+                @if (auth.isAdmin()) {
+                  Administrator
+                } @else if (auth.isResepsionis()) {
+                  Resepsionis
+                } @else {
+                  Sekretaris
+                }
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">
+                <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+                <span>Status Akun</span>
+              </div>
+              <div class="info-value" style="color: #16a34a;">
+                Aktif (Terverifikasi)
+              </div>
+            </div>
+          </div>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            size="small"
+            class="quick-btn"
+            routerLink="/profil"
+          >
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Edit Profil & Ganti Password
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="account-col">
+        @if (auth.canManageRooms() || auth.canManageUsers()) {
+          <div class="section-title"><span>Menu Khusus</span></div>
+
+          @if (auth.canManageRooms()) {
+            <div class="card clickable" routerLink="/ruangan">
+              <div class="card-row">
+                <div class="avatar" style="background: #dcf3e0; color: #15803d;">
+                  <ion-icon name="cube-outline"></ion-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="card-title">Kelola Ruang Rapat</h4>
+                </div>
+                <ion-icon name="chevron-forward-outline" color="medium" style="flex-shrink: 0;"></ion-icon>
+              </div>
+            </div>
+          }
+
+          @if (auth.canManageUsers()) {
+            <div class="card clickable" routerLink="/pengguna">
+              <div class="card-row">
+                <div class="avatar" style="background: #fef9c3; color: #a16207;">
+                  <ion-icon name="people-circle-outline"></ion-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="card-title">Kelola Pengguna</h4>
+                </div>
+                <ion-icon name="chevron-forward-outline" color="medium" style="flex-shrink: 0;"></ion-icon>
+              </div>
+            </div>
+          }
+        }
+
+        <div class="app-brand-footer">
+          <img src="assets/logo.png" alt="Tirta Tarum" class="app-brand-footer-logo" />
+          <div class="app-brand-footer-text">
+            <h5 class="app-brand-footer-name">Perumdam Tirta Tarum</h5>
+            <p class="app-brand-footer-sub">Sistem Informasi Buku Tamu & Manajemen Rapat</p>
+          </div>
+        </div>
+
+        <ion-button
+          expand="block"
+          color="danger"
+          fill="outline"
+          style="margin-top: 16px;"
+          (click)="logout()"
+        >
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          Keluar dari Akun
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

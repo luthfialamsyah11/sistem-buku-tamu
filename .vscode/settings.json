@@ -1,0 +1,11 @@
+{
+  "terminal.integrated.env.windows": {
+    "PATH": "C:\\laragon\\bin\\php\\php-8.3.30-Win32-vs16-x64;C:\\laragon\\bin\\mysql\\mysql-8.4.3-winx64\\bin;${env:PATH}"
+  },
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "args": ["-ExecutionPolicy", "Bypass"]
+    }
+  }
+}

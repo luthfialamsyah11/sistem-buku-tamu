@@ -1,0 +1,229 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button
+        class="sidebar-toggle-btn"
+        (click)="openMenu()"
+        fill="clear"
+        color="dark"
+        title="Tampilkan / Sembunyikan Menu"
+      >
+        <ion-icon slot="icon-only" name="menu-outline" style="font-size: 26px;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Buku Tamu</ion-title>
+    <ion-buttons slot="end">
+      @if (auth.canManageVisitors()) {
+        <ion-button color="primary" (click)="openForm()">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Tambah
+        </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-searchbar
+      class="app-search"
+      placeholder="Cari nama tamu, instansi, atau keperluan..."
+      [debounce]="50"
+      [value]="search()"
+      (ionInput)="search.set($any($event).detail.value || '')"
+    ></ion-searchbar>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment class="app-segment" [value]="statusFilter()" (ionChange)="statusFilter.set($any($event).detail.value || '')">
+      <ion-segment-button value="">Semua ({{ rawVisitors().length }})</ion-segment-button>
+      <ion-segment-button value="pending">Menunggu</ion-segment-button>
+      <ion-segment-button value="checked_in">Di Lokasi</ion-segment-button>
+      <ion-segment-button value="checked_out">Selesai</ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-body">
+    <div class="card-grid">
+      @for (v of visitors(); track v.id) {
+        <div class="card">
+          <div class="card-row">
+            <div class="avatar">{{ v.visitor_name | initials }}</div>
+            <div class="flex-1 min-w-0">
+              <h3 class="card-title">{{ v.visitor_name }}</h3>
+              <p class="card-subtitle">{{ v.company || 'Tamu Pribadi' }} &bull; {{ v.visitor_phone }}</p>
+            </div>
+            <span class="chip" [class]="statusMap[v.status].color">
+              {{ statusMap[v.status].label }}
+            </span>
+          </div>
+
+          <div class="card-info">
+            <div class="meta">
+              <ion-icon name="person-outline"></ion-icon>
+              <span>Menemui: <b>{{ v.host_name || v.host?.name }}</b></span>
+            </div>
+            <div class="meta">
+              <ion-icon name="document-text-outline"></ion-icon>
+              <span>Keperluan: <b>{{ v.purpose }}</b></span>
+            </div>
+            <div class="meta">
+              <ion-icon name="calendar-clear-outline"></ion-icon>
+              <span>
+                {{ v.visit_date | tanggal }}
+                @if (v.check_in_time) {
+                  &bull; Masuk {{ v.check_in_time | jam }}
+                }
+                @if (v.check_out_time) {
+                  &bull; Keluar {{ v.check_out_time | jam }}
+                }
+              </span>
+            </div>
+            @if (v.notes) {
+              <div class="meta">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>Alamat: <b>{{ v.notes }}</b></span>
+              </div>
+            }
+          </div>
+
+          <div class="card-actions">
+            @if (auth.canManageVisitors() && v.status === 'pending') {
+              <ion-button color="success" size="small" (click)="setStatus(v, 'checked_in')">
+                <ion-icon name="log-in-outline" slot="start"></ion-icon>
+                Check-In
+              </ion-button>
+              <ion-button fill="outline" color="danger" size="small" (click)="setStatus(v, 'rejected')">
+                Tolak
+              </ion-button>
+            }
+            @if (auth.canManageVisitors() && v.status === 'checked_in') {
+              <ion-button color="dark" size="small" (click)="setStatus(v, 'checked_out')">
+                <ion-icon name="log-out-outline" slot="start"></ion-icon>
+                Check-Out
+              </ion-button>
+            }
+            @if (auth.canManageVisitors()) {
+              <ion-button fill="outline" color="primary" size="small" (click)="openForm(v)">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                Edit
+              </ion-button>
+              <ion-button fill="outline" color="danger" size="small" (click)="remove(v)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            }
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <h3>Belum Ada Data Tamu</h3>
+          <p>{{ auth.canManageVisitors() ? 'Klik tombol Tambah di kanan atas untuk mencatat tamu baru.' : 'Belum ada catatan kunjungan tamu.' }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <ion-modal [isOpen]="modalOpen()" (didDismiss)="modalOpen.set(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ editingId() ? 'Edit Data Tamu' : 'Tambah Tamu Baru' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modalOpen.set(false)">Tutup</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div class="form-section">Identitas Tamu</div>
+
+        <ion-input
+          class="field"
+          label="Nama Lengkap *"
+          labelPlacement="stacked"
+          fill="outline"
+          placeholder="Contoh: Budi Santoso"
+          [(ngModel)]="form.visitor_name"
+        ></ion-input>
+
+        <div class="field-row">
+          <ion-input
+            class="field"
+            label="No. HP / WhatsApp *"
+            labelPlacement="stacked"
+            fill="outline"
+            placeholder="0812xxxx"
+            [(ngModel)]="form.visitor_phone"
+          ></ion-input>
+
+          <ion-input
+            class="field"
+            label="Asal Instansi"
+            labelPlacement="stacked"
+            fill="outline"
+            placeholder="PT Mitra Jaya"
+            [(ngModel)]="form.company"
+          ></ion-input>
+        </div>
+
+        <div class="form-section">Detail Kunjungan</div>
+
+        <ion-input
+          class="field"
+          label="Karyawan / Orang yang Ditemui *"
+          labelPlacement="stacked"
+          fill="outline"
+          placeholder="Ketik nama orang / bagian yang ditemui"
+          [(ngModel)]="form.host_name"
+        ></ion-input>
+
+        <div class="app-form-group">
+          <label class="app-form-label">Tanggal Kunjungan <span class="required">*</span></label>
+          <div class="app-input-box">
+            <ion-icon name="calendar-outline" class="app-input-icon"></ion-icon>
+            <input
+              type="date"
+              class="app-native-input"
+              [(ngModel)]="form.visit_date"
+            />
+          </div>
+        </div>
+
+        <ion-input
+          class="field"
+          label="Keperluan Kunjungan *"
+          labelPlacement="stacked"
+          fill="outline"
+          placeholder="Contoh: Diskusi jaringan server"
+          [(ngModel)]="form.purpose"
+        ></ion-input>
+
+        <ion-textarea
+          class="field"
+          label="Alamat"
+          labelPlacement="stacked"
+          fill="outline"
+          [rows]="2"
+          placeholder="Masukkan alamat lengkap tamu"
+          [(ngModel)]="form.notes"
+        ></ion-textarea>
+      </ion-content>
+
+      <ion-footer class="form-footer">
+        <ion-toolbar>
+          <ion-button expand="block" (click)="save()">
+            {{ editingId() ? 'Simpan Perubahan' : 'Simpan Data Tamu' }}
+          </ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+

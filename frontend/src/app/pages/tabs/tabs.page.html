@@ -1,0 +1,79 @@
+<div class="wa-shell">
+  <div
+    class="wa-viewport admin-desktop-full"
+    #viewport
+    (scroll)="onScroll()"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp()"
+    (pointercancel)="onPointerUp()"
+  >
+    <div class="wa-slide" [class.active-slide]="activeTab() === 0">
+      <app-dashboard #dashboardPage></app-dashboard>
+    </div>
+    <div class="wa-slide" [class.active-slide]="activeTab() === 1">
+      <app-visitors #visitorsPage></app-visitors>
+    </div>
+    <div class="wa-slide" [class.active-slide]="activeTab() === 2">
+      <app-meetings #meetingsPage></app-meetings>
+    </div>
+    <div class="wa-slide" [class.active-slide]="activeTab() === 3">
+      <app-account #accountPage></app-account>
+    </div>
+  </div>
+
+  <nav class="wa-tabbar admin-desktop-hide" aria-label="Menu Navigasi">
+    <div class="wa-indicator-track">
+      <div class="wa-indicator-bar" [style.transform]="'translateX(' + (activeTab() * 100) + '%)'"></div>
+    </div>
+
+    <button
+      type="button"
+      class="wa-tab-btn"
+      [class.active]="activeTab() === 0"
+      (click)="selectTab(0)"
+    >
+      <div class="wa-icon-box">
+        <ion-icon [name]="activeTab() === 0 ? 'grid' : 'grid-outline'"></ion-icon>
+      </div>
+      <span class="wa-tab-label">Beranda</span>
+    </button>
+
+    <button
+      type="button"
+      class="wa-tab-btn"
+      [class.active]="activeTab() === 1"
+      (click)="selectTab(1)"
+    >
+      <div class="wa-icon-box">
+        <ion-icon [name]="activeTab() === 1 ? 'people' : 'people-outline'"></ion-icon>
+      </div>
+      <span class="wa-tab-label">Buku Tamu</span>
+    </button>
+
+    <button
+      type="button"
+      class="wa-tab-btn"
+      [class.active]="activeTab() === 2"
+      (click)="selectTab(2)"
+    >
+      <div class="wa-icon-box">
+        <ion-icon [name]="activeTab() === 2 ? 'calendar' : 'calendar-outline'"></ion-icon>
+      </div>
+      <span class="wa-tab-label">Rapat & Ruang</span>
+    </button>
+
+    <button
+      type="button"
+      class="wa-tab-btn"
+      [class.active]="activeTab() === 3"
+      (click)="selectTab(3)"
+    >
+      <div class="wa-icon-box">
+        <ion-icon [name]="activeTab() === 3 ? 'person' : 'person-outline'"></ion-icon>
+      </div>
+      <span class="wa-tab-label">Akun</span>
+    </button>
+  </nav>
+</div>
+

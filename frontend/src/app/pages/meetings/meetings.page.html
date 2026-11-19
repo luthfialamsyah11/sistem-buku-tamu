@@ -1,0 +1,343 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button
+        class="sidebar-toggle-btn"
+        (click)="openMenu()"
+        fill="clear"
+        color="dark"
+        title="Tampilkan / Sembunyikan Menu"
+      >
+        <ion-icon slot="icon-only" name="menu-outline" style="font-size: 26px;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Rapat & Ruangan</ion-title>
+    <ion-buttons slot="end">
+      @if (activeSegment() === 'meetings' && auth.canManageMeetings()) {
+      <ion-button color="primary" (click)="openForm()">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Buat Rapat
+      </ion-button>
+      }
+      @if (activeSegment() === 'rooms' && auth.canManageRooms()) {
+      <ion-button color="primary" (click)="openRoomForm()">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Tambah Ruangan
+      </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment class="app-segment" [value]="activeSegment()"
+      (ionChange)="activeSegment.set($any($event).detail.value)">
+      <ion-segment-button value="meetings">
+        <ion-icon name="calendar-outline" style="margin-right: 4px;"></ion-icon>
+        Jadwal Rapat ({{ rawMeetings().length }})
+      </ion-segment-button>
+      <ion-segment-button value="rooms">
+        <ion-icon name="cube-outline" style="margin-right: 4px;"></ion-icon>
+        Ruang Rapat ({{ rooms().length }})
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+
+  @if (activeSegment() === 'meetings') {
+  <ion-toolbar>
+    <ion-searchbar class="app-search" placeholder="Cari judul rapat atau ruangan..." [debounce]="50"
+      [value]="search()" (ionInput)="search.set($any($event).detail.value || '')"></ion-searchbar>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <div class="filter-bar">
+      <input class="date-input" type="date" [value]="dateFilter()" (input)="dateFilter.set($any($event).target.value || '')" />
+      @if (dateFilter()) {
+      <ion-button size="small" fill="outline" color="medium" (click)="clearDate()">
+        Semua Tanggal
+      </ion-button>
+      }
+    </div>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment class="app-segment" [value]="statusFilter()" (ionChange)="statusFilter.set($any($event).detail.value || '')">
+      <ion-segment-button value="">Semua</ion-segment-button>
+      <ion-segment-button value="pending">Menunggu</ion-segment-button>
+      <ion-segment-button value="approved">Disetujui</ion-segment-button>
+      <ion-segment-button value="rejected">Ditolak</ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+  }
+
+  @if (activeSegment() === 'rooms') {
+  <ion-toolbar>
+    <ion-searchbar class="app-search" placeholder="Cari nama ruangan, lokasi, fasilitas..." [debounce]="250"
+      [(ngModel)]="roomSearchInput" (ionInput)="roomSearch.set(roomSearchInput)"></ion-searchbar>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-segment class="app-segment" [(ngModel)]="roomStatusFilterInput"
+      (ionChange)="roomStatusFilter.set(roomStatusFilterInput)">
+      <ion-segment-button value="">Semua Status</ion-segment-button>
+      <ion-segment-button value="available">Tersedia</ion-segment-button>
+      <ion-segment-button value="maintenance">Perbaikan</ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+  }
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-body">
+    @if (activeSegment() === 'meetings') {
+    <div class="card-grid">
+      @for (m of meetings(); track m.id) {
+      <div class="card">
+        <div class="card-row">
+          <div class="avatar">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="card-title">{{ m.title }}</h3>
+            <p class="card-subtitle">{{ m.room?.room_name }} &bull; {{ m.room?.location }}</p>
+          </div>
+          <span class="chip" [class]="statusMap[m.status].color">
+            {{ statusMap[m.status].label }}
+          </span>
+        </div>
+
+        <div class="card-info">
+          <div class="meta">
+            <ion-icon name="time-outline"></ion-icon>
+            <span><b>{{ m.meeting_date | tanggal }}</b> &bull; {{ m.start_time | jam }} - {{ m.end_time | jam }}</span>
+          </div>
+          <div class="meta">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>Penyelenggara: <b>{{ m.organizer?.name }}</b></span>
+          </div>
+          @if (m.description) {
+          <div class="meta">
+            <ion-icon name="chatbox-ellipses-outline"></ion-icon>
+            <span>{{ m.description }}</span>
+          </div>
+          }
+        </div>
+
+        <div class="card-actions">
+          @if (auth.canManageMeetings() && m.status === 'pending') {
+          <ion-button color="success" size="small" (click)="setStatus(m, 'approved')">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Setujui
+          </ion-button>
+          <ion-button fill="outline" color="danger" size="small" (click)="setStatus(m, 'rejected')">
+            Tolak
+          </ion-button>
+          }
+
+          @if (auth.canManageMeetings()) {
+          <ion-button fill="outline" color="primary" size="small" (click)="openForm(m)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+          <ion-button fill="outline" color="danger" size="small" (click)="remove(m)">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+          }
+        </div>
+      </div>
+      } @empty {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <h3>Tidak Ada Jadwal Rapat</h3>
+        <p>{{ auth.canManageMeetings() ? 'Klik Buat Rapat di kanan atas untuk mengajukan jadwal baru.' : 'Belum ada
+          agenda jadwal rapat.' }}</p>
+      </div>
+      }
+    </div>
+    }
+
+    @if (activeSegment() === 'rooms') {
+    <div class="card-grid">
+      @for (r of filteredRooms(); track r.id) {
+      <div class="card">
+        <div class="card-row">
+          <div class="avatar">
+            <ion-icon name="cube-outline"></ion-icon>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="card-title">{{ r.room_name }}</h3>
+            <p class="card-subtitle">{{ r.location }}</p>
+            @if (getTodayMeetingCount(r.id) > 0) {
+            <span class="room-schedule-count">
+              <ion-icon name="time-outline"></ion-icon>
+              {{ getTodayMeetingCount(r.id) }} Rapat Hari Ini
+            </span>
+            }
+          </div>
+          <span class="chip" [class]="r.status === 'available' ? 'success' : 'warning'">
+            {{ r.status === 'available' ? 'Tersedia' : 'Perbaikan' }}
+          </span>
+        </div>
+
+        @if (r.facilities) {
+        <div class="card-info">
+          <div class="meta">
+            <ion-icon name="tv-outline"></ion-icon>
+            <span>Fasilitas: <b>{{ r.facilities }}</b></span>
+          </div>
+        </div>
+        }
+
+        @if (auth.canManageRooms()) {
+        <div class="card-actions">
+          <ion-button fill="outline" size="small" [color]="r.status === 'available' ? 'warning' : 'success'"
+            (click)="toggleRoomStatus(r)">
+            <ion-icon [name]="r.status === 'available' ? 'construct-outline' : 'checkmark-circle-outline'"
+              slot="start"></ion-icon>
+            {{ r.status === 'available' ? 'Set Perbaikan' : 'Set Tersedia' }}
+          </ion-button>
+
+          <ion-button fill="outline" color="primary" size="small" (click)="openRoomForm(r)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+
+          <ion-button fill="outline" color="danger" size="small" (click)="removeRoom(r)">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+        }
+      </div>
+      } @empty {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="cube-outline"></ion-icon>
+        </div>
+        <h3>Belum Ada Ruang Rapat</h3>
+        <p>{{ auth.canManageRooms() ? 'Klik Tambah Ruangan di kanan atas untuk membuat ruangan baru.' : 'Belum ada data
+          ruangan.' }}</p>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <ion-modal [isOpen]="modalOpen()" (didDismiss)="modalOpen.set(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ editingId() ? 'Edit Jadwal Rapat' : 'Booking Ruang Rapat' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modalOpen.set(false)">Tutup</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div class="form-section">Informasi Rapat</div>
+
+        <ion-input class="field" label="Judul / Agenda Rapat *" labelPlacement="stacked" fill="outline"
+          placeholder="Contoh: Rapat Evaluasi Mingguan" [(ngModel)]="form.title"></ion-input>
+
+        <div class="field-header-row">
+          <span class="app-form-label">Pilih Ruang Rapat <span class="required">*</span></span>
+          @if (auth.canManageRooms()) {
+            <a class="form-action-link" (click)="openRoomForm()">+ Tambah Ruangan</a>
+          }
+        </div>
+
+        <ion-select class="field" fill="outline" placeholder="-- Pilih Ruangan --"
+          interface="action-sheet" [(ngModel)]="form.room_id">
+          @for (r of rooms(); track r.id) {
+          <ion-select-option [value]="r.id">
+            {{ r.room_name }} - {{ r.location }} {{ r.status === 'maintenance' ? '(Perbaikan)' : '' }}
+          </ion-select-option>
+          }
+        </ion-select>
+
+        <div class="app-form-group">
+          <label class="app-form-label">Tanggal Rapat <span class="required">*</span></label>
+          <div class="app-input-box">
+            <ion-icon name="calendar-outline" class="app-input-icon"></ion-icon>
+            <input type="date" class="app-native-input" [(ngModel)]="form.meeting_date" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="app-form-group">
+            <label class="app-form-label">Jam Mulai <span class="required">*</span></label>
+            <div class="app-input-box">
+              <ion-icon name="time-outline" class="app-input-icon"></ion-icon>
+              <input type="time" class="app-native-input" [(ngModel)]="form.start_time" />
+            </div>
+          </div>
+
+          <div class="app-form-group">
+            <label class="app-form-label">Jam Selesai <span class="required">*</span></label>
+            <div class="app-input-box">
+              <ion-icon name="time-outline" class="app-input-icon"></ion-icon>
+              <input type="time" class="app-native-input" [(ngModel)]="form.end_time" />
+            </div>
+          </div>
+        </div>
+
+        <ion-textarea class="field" label="Deskripsi / Catatan Rapat" labelPlacement="stacked" fill="outline" [rows]="3"
+          placeholder="Pokok pembahasan rapat..." [(ngModel)]="form.description"></ion-textarea>
+      </ion-content>
+
+      <ion-footer class="form-footer">
+        <ion-toolbar>
+          <ion-button expand="block" (click)="save()">
+            {{ editingId() ? 'Simpan Perubahan' : 'Simpan Jadwal Rapat' }}
+          </ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="roomModalOpen()" (didDismiss)="roomModalOpen.set(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ editingRoomId() ? 'Edit Ruang Rapat' : 'Tambah Ruang Rapat' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="roomModalOpen.set(false)">Tutup</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div class="form-section">Data Ruangan</div>
+
+        <ion-input class="field" label="Nama Ruangan *" labelPlacement="stacked" fill="outline"
+          placeholder="Contoh: Ruang Rapat Utama" [(ngModel)]="roomForm.room_name"></ion-input>
+
+        <ion-input class="field" label="Lokasi / Lantai *" labelPlacement="stacked" fill="outline"
+          placeholder="Contoh: Lantai 2 Gedung A" [(ngModel)]="roomForm.location"></ion-input>
+
+        <ion-select class="field" label="Status Ketersediaan Ruangan" labelPlacement="stacked" fill="outline"
+          [(ngModel)]="roomForm.status">
+          <ion-select-option value="available">Tersedia untuk Rapat</ion-select-option>
+          <ion-select-option value="maintenance">Sedang Dalam Perbaikan</ion-select-option>
+        </ion-select>
+
+        <ion-textarea class="field" label="Fasilitas Ruangan" labelPlacement="stacked" fill="outline" [rows]="3"
+          placeholder="Contoh: Proyektor 4K, Smart TV, AC, Sound System, Papan Tulis..."
+          [(ngModel)]="roomForm.facilities"></ion-textarea>
+      </ion-content>
+
+      <ion-footer class="form-footer">
+        <ion-toolbar>
+          <ion-button expand="block" (click)="saveRoom()">
+            {{ editingRoomId() ? 'Simpan Perubahan Ruangan' : 'Tambah Ruang Rapat' }}
+          </ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+</ion-content>
