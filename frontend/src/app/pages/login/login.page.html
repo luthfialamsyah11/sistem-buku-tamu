@@ -15,13 +15,19 @@
     <div class="login-card">
       <div class="input-field-group">
         <div class="field-inner">
-          <span class="field-label">Email</span>
+          <span class="field-label">NIP</span>
           <input
-            type="email"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
             class="native-input"
-            placeholder="nama@kantor.com"
-            [(ngModel)]="email"
-            autocomplete="email"
+            placeholder="Masukkan NIP (maks. 6 angka)"
+            [value]="nip"
+            (keydown)="onlyNumbers($event)"
+            (input)="onNipInput($event)"
+            (paste)="onNipPaste($event)"
+            autocomplete="username"
             autocapitalize="off"
             spellcheck="false"
           />

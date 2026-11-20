@@ -33,5 +33,10 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./pages/users/users.page').then((m) => m.UsersPage),
   },
+  {
+    path: 'it-support',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./pages/it-support/it-support.page').then((m) => m.ItSupportPage),
+  },
   { path: '**', redirectTo: 'tabs/beranda' },
 ];

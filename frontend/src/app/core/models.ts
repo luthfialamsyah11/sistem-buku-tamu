@@ -2,8 +2,8 @@ export type Role = 'admin' | 'resepsionis' | 'sekretaris';
 
 export interface User {
   id: number;
+  nip: string;
   name: string;
-  email: string;
   phone?: string | null;
   department?: string | null;
   role: Role;
@@ -81,4 +81,29 @@ export const MEETING_STATUS: Record<string, StatusInfo> = {
   rejected: { label: 'Ditolak', color: 'danger' },
   completed: { label: 'Selesai', color: 'primary' },
   cancelled: { label: 'Dibatalkan', color: 'medium' },
+};
+
+export type ItSupportCategory = 'hardware' | 'software';
+export type ItSupportStatus = 'pending' | 'in_progress' | 'resolved' | 'rejected';
+
+export interface ItSupport {
+  id: number;
+  reporter_name: string;
+  reporter_phone: string;
+  department: string;
+  complaint: string;
+  report_date: string;
+  category: ItSupportCategory;
+  damage_type: string;
+  photo_before?: string | null;
+  photo_after?: string | null;
+  status: ItSupportStatus;
+  created_at?: string | null;
+}
+
+export const IT_SUPPORT_STATUS: Record<ItSupportStatus, StatusInfo> = {
+  pending: { label: 'Menunggu', color: 'warning' },
+  in_progress: { label: 'Diproses', color: 'primary' },
+  resolved: { label: 'Selesai', color: 'success' },
+  rejected: { label: 'Ditolak', color: 'danger' },
 };

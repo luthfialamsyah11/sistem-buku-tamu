@@ -16,7 +16,7 @@ export class LoginPage {
   private router = inject(Router);
   private ui = inject(UiService);
 
-  email = '';
+  nip = '';
   password = '';
   loading = signal(false);
   showPassword = signal(false);
@@ -25,15 +25,50 @@ export class LoginPage {
     this.showPassword.update((v) => !v);
   }
 
+  onlyNumbers(event: KeyboardEvent) {
+    const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'];
+    if (allowed.includes(event.key) || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  onNipInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const clean = (target.value || '').replace(/\D/g, '').slice(0, 6);
+    target.value = clean;
+    this.nip = clean;
+  }
+
+  onNipPaste(event: ClipboardEvent) {
+    event.preventDefault();
+    const pasted = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    const target = event.target as HTMLInputElement;
+    target.value = pasted;
+    this.nip = pasted;
+  }
+
+  sanitizeNip() {
+    this.nip = this.nip.replace(/\D/g, '').slice(0, 6);
+  }
+
   async submit() {
-    if (!this.email || !this.password) {
-      this.ui.toast('Email dan password wajib diisi', 'warning');
+    this.sanitizeNip();
+    if (!this.nip || !this.password) {
+      this.ui.toast('NIP dan password wajib diisi', 'warning');
+      return;
+    }
+
+    if (this.nip.length > 6) {
+      this.ui.toast('NIP maksimal 6 angka', 'warning');
       return;
     }
 
     this.loading.set(true);
     try {
-      const user = await this.auth.login(this.email.trim(), this.password);
+      const user = await this.auth.login(this.nip.trim(), this.password);
       this.ui.toast(`Selamat datang, ${user.name}`, 'success');
       this.router.navigateByUrl('/tabs/beranda', { replaceUrl: true });
     } catch (err) {

@@ -46,13 +46,32 @@ export class UsersPage implements OnInit, OnDestroy, ViewWillEnter {
 
   emptyForm() {
     return {
+      nip: '',
       name: '',
-      email: '',
       password: '',
       phone: '',
       department: '',
       role: 'resepsionis' as Role,
     };
+  }
+
+  onlyNumbers(event: KeyboardEvent) {
+    const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'];
+    if (allowed.includes(event.key) || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  sanitizeFormNip(event?: any) {
+    const raw = event?.target?.value ?? this.form.nip ?? '';
+    const clean = String(raw).replace(/\D/g, '').slice(0, 6);
+    this.form.nip = clean;
+    if (event?.target) {
+      event.target.value = clean;
+    }
   }
 
   async load(silent = false) {
@@ -69,8 +88,8 @@ export class UsersPage implements OnInit, OnDestroy, ViewWillEnter {
     if (item) {
       this.editingId.set(item.id);
       this.form = {
+        nip: item.nip,
         name: item.name,
-        email: item.email,
         password: '',
         phone: item.phone ?? '',
         department: item.department ?? '',
@@ -84,6 +103,20 @@ export class UsersPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   async save() {
+    this.sanitizeFormNip();
+    if (!this.form.nip.trim() || this.form.nip.length > 6) {
+      this.ui.toast('NIP wajib diisi (maks. 6 angka)', 'warning');
+      return;
+    }
+    if (!this.form.name.trim()) {
+      this.ui.toast('Nama pengguna wajib diisi', 'warning');
+      return;
+    }
+    if (!this.editingId() && !this.form.password) {
+      this.ui.toast('Password wajib diisi', 'warning');
+      return;
+    }
+
     try {
       const id = this.editingId();
       const res = id

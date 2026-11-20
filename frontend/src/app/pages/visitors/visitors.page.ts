@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, MenuController } from '@ionic/angular/lazy';
 import { ApiService } from '../../core/api.service';
@@ -46,7 +46,7 @@ export class VisitorsPage {
   });
 
   openMenu() {
-    if (this.auth.isDesktop || (typeof window !== 'undefined' && window.innerWidth >= 768)) {
+    if (this.auth.isDesktop) {
       this.auth.toggleDesktopSidebar();
     } else {
       this.menuCtrl.toggle('admin-menu');

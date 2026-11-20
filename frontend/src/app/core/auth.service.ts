@@ -23,23 +23,17 @@ export class AuthService {
   readonly desktopSidebarHidden = signal<boolean>(false);
   private lastRefreshTime = 0;
 
-  readonly isDesktop = typeof window !== 'undefined'
-    ? !/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase())
-    : true;
+  static readonly DESKTOP_QUERY = '(min-width: 1024px)';
+
+  get isDesktop(): boolean {
+    return typeof window !== 'undefined' && window.matchMedia(AuthService.DESKTOP_QUERY).matches;
+  }
 
   toggleDesktopSidebar() {
     this.desktopSidebarHidden.update((v) => !v);
   }
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      if (this.isDesktop) {
-        document.documentElement.classList.add('is-desktop-device');
-      } else {
-        document.documentElement.classList.add('is-mobile-device');
-      }
-    }
-
     if (this.isLoggedIn) {
       this.refreshUser();
     }
@@ -75,12 +69,12 @@ export class AuthService {
         this.setUser(res.data);
         return res.data;
       }
-    } catch {}
+    } catch { }
     return this.user();
   }
 
-  async login(email: string, password: string) {
-    const res = await this.api.post<{ token: string; user: User }>('/login', { email, password });
+  async login(nip: string, password: string) {
+    const res = await this.api.post<{ token: string; user: User }>('/login', { nip, password });
     localStorage.setItem(TOKEN_KEY, res.data.token);
     this.setUser(res.data.user);
     return res.data.user;

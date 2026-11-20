@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="has-scroll-filter">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button
@@ -21,25 +21,6 @@
       }
     </ion-buttons>
   </ion-toolbar>
-
-  <ion-toolbar>
-    <ion-searchbar
-      class="app-search"
-      placeholder="Cari nama tamu, instansi, atau keperluan..."
-      [debounce]="50"
-      [value]="search()"
-      (ionInput)="search.set($any($event).detail.value || '')"
-    ></ion-searchbar>
-  </ion-toolbar>
-
-  <ion-toolbar>
-    <ion-segment class="app-segment" [value]="statusFilter()" (ionChange)="statusFilter.set($any($event).detail.value || '')">
-      <ion-segment-button value="">Semua ({{ rawVisitors().length }})</ion-segment-button>
-      <ion-segment-button value="pending">Menunggu</ion-segment-button>
-      <ion-segment-button value="checked_in">Di Lokasi</ion-segment-button>
-      <ion-segment-button value="checked_out">Selesai</ion-segment-button>
-    </ion-segment>
-  </ion-toolbar>
 </ion-header>
 
 <ion-content>
@@ -47,7 +28,25 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
+  <div class="scroll-filter-section">
+    <ion-searchbar
+      class="app-search"
+      placeholder="Cari nama tamu, instansi, atau keperluan..."
+      [debounce]="50"
+      [value]="search()"
+      (ionInput)="search.set($any($event).detail.value || '')"
+    ></ion-searchbar>
+
+    <ion-segment class="app-segment" [value]="statusFilter()" (ionChange)="statusFilter.set($any($event).detail.value || '')">
+      <ion-segment-button value="">Semua ({{ rawVisitors().length }})</ion-segment-button>
+      <ion-segment-button value="pending">Menunggu</ion-segment-button>
+      <ion-segment-button value="checked_in">Di Lokasi</ion-segment-button>
+      <ion-segment-button value="checked_out">Selesai</ion-segment-button>
+    </ion-segment>
+  </div>
+
   <div class="page-body">
+
     <div class="card-grid">
       @for (v of visitors(); track v.id) {
         <div class="card">

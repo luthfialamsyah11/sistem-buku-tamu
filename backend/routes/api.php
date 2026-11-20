@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\ItSupportController;
 use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\UserController;
@@ -44,5 +45,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users', [UserController::class, 'store']);
         Route::put('/users/{user}', [UserController::class, 'update']);
         Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+        Route::get('/it-supports', [ItSupportController::class, 'index']);
+        Route::post('/it-supports', [ItSupportController::class, 'store']);
+        Route::put('/it-supports/{itSupport}', [ItSupportController::class, 'update']);
+        Route::patch('/it-supports/{itSupport}/status', [ItSupportController::class, 'updateStatus']);
+        Route::delete('/it-supports/{itSupport}', [ItSupportController::class, 'destroy']);
     });
 });

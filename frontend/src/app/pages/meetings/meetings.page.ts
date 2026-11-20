@@ -33,8 +33,8 @@ import { SHARED_PIPES, todayStr } from '../../shared/pipes';
 
     .date-input {
       flex: 1;
-      height: 38px;
-      border-radius: 10px;
+      height: 40px;
+      border-radius: 12px;
       border: 1px solid var(--app-border);
       background: var(--app-bg);
       padding: 0 12px;
@@ -72,11 +72,9 @@ export class MeetingsPage {
 
   private isMeetingsLoading = false;
   private isRoomsLoading = false;
-  private lastMeetingsLoadTime = 0;
-  private lastRoomsLoadTime = 0;
 
   openMenu() {
-    if (this.auth.isDesktop || (typeof window !== 'undefined' && window.innerWidth >= 768)) {
+    if (this.auth.isDesktop) {
       this.auth.toggleDesktopSidebar();
     } else {
       this.menuCtrl.toggle('admin-menu');
@@ -167,7 +165,7 @@ export class MeetingsPage {
       const res = await this.api.get<Meeting[]>('/meetings');
       this.rawMeetings.set(res.data);
       if (this.rooms().length === 0) {
-        this.loadRooms(true);
+        this.loadRooms();
       }
     } catch (err) {
       if (!silent && this.auth.isLoggedIn) this.ui.error(err);
@@ -180,7 +178,7 @@ export class MeetingsPage {
     if (this.activeSegment() === 'meetings') {
       await this.load(false);
     } else {
-      await this.loadRooms(false);
+      await this.loadRooms();
     }
     (ev.target as HTMLIonRefresherElement).complete();
   }
@@ -253,7 +251,7 @@ export class MeetingsPage {
     }
   }
 
-  async loadRooms(silent = false) {
+  async loadRooms() {
     if (!this.auth.isLoggedIn) return;
     if (this.isRoomsLoading) return;
     this.isRoomsLoading = true;

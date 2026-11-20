@@ -1,0 +1,479 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button
+        class="sidebar-toggle-btn"
+        (click)="openMenu()"
+        fill="clear"
+        color="dark"
+        title="Tampilkan / Sembunyikan Menu"
+      >
+        <ion-icon slot="icon-only" name="menu-outline" style="font-size: 26px;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>IT Support</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="primary" (click)="openForm()">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Tambah
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-body">
+    <div class="it-stats-row">
+      <button
+        type="button"
+        class="it-kpi-card"
+        [class.active]="statusFilter() === 'all'"
+        (click)="setStatusFilter('all')"
+      >
+        <div class="kpi-icon total">
+          <ion-icon name="documents-outline"></ion-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-num">{{ stats().total }}</span>
+          <span class="kpi-label">Semua Komplain</span>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="it-kpi-card"
+        [class.active]="statusFilter() === 'pending'"
+        (click)="setStatusFilter('pending')"
+      >
+        <div class="kpi-icon pending">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-num">{{ stats().pending }}</span>
+          <span class="kpi-label">Menunggu</span>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="it-kpi-card"
+        [class.active]="statusFilter() === 'in_progress'"
+        (click)="setStatusFilter('in_progress')"
+      >
+        <div class="kpi-icon progress">
+          <ion-icon name="sync-outline"></ion-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-num">{{ stats().inProgress }}</span>
+          <span class="kpi-label">Sedang Diproses</span>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="it-kpi-card"
+        [class.active]="statusFilter() === 'resolved'"
+        (click)="setStatusFilter('resolved')"
+      >
+        <div class="kpi-icon resolved">
+          <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-num">{{ stats().resolved }}</span>
+          <span class="kpi-label">Selesai</span>
+        </div>
+      </button>
+    </div>
+
+    <div class="it-filter-panel">
+      <div class="it-search-box">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          type="text"
+          class="it-search-input"
+          placeholder="Cari pelapor, departemen, jenis kerusakan, atau keluhan..."
+          [value]="search()"
+          (input)="search.set($any($event).target.value || '')"
+        />
+        @if (search()) {
+          <button type="button" class="clear-search-btn" (click)="search.set('')">
+            <ion-icon name="close-circle"></ion-icon>
+          </button>
+        }
+      </div>
+
+      <div class="it-filter-chips">
+        <div class="chip-group">
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="categoryFilter() === 'all'"
+            (click)="setCategoryFilter('all')"
+          >
+            Semua Kategori
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="categoryFilter() === 'hardware'"
+            (click)="setCategoryFilter('hardware')"
+          >
+            <ion-icon name="hardware-chip-outline"></ion-icon>
+            Hardware
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            [class.active]="categoryFilter() === 'software'"
+            (click)="setCategoryFilter('software')"
+          >
+            <ion-icon name="code-slash-outline"></ion-icon>
+            Software
+          </button>
+        </div>
+
+        @if (isFilterActive()) {
+          <button type="button" class="reset-filter-btn" (click)="resetFilters()">
+            <ion-icon name="refresh-outline"></ion-icon>
+            Reset Filter
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (items().length > 0) {
+      <div class="card-grid">
+        @for (item of items(); track item.id) {
+          <div class="card it-ticket-card">
+            <div class="ticket-top-row">
+              <div class="ticket-cat-badge" [class.software]="item.category === 'software'">
+                <ion-icon [name]="item.category === 'hardware' ? 'hardware-chip-outline' : 'code-slash-outline'"></ion-icon>
+                <span>{{ item.category === 'hardware' ? 'HARDWARE' : 'SOFTWARE' }}</span>
+              </div>
+              <span class="chip" [class]="statusMap[item.status].color">
+                {{ statusMap[item.status].label }}
+              </span>
+            </div>
+
+            <div class="ticket-header-info">
+              <h3 class="ticket-title">{{ item.damage_type }}</h3>
+              <p class="ticket-meta">
+                <b>{{ item.reporter_name }}</b> &bull; {{ item.department }}
+              </p>
+            </div>
+
+            <div class="ticket-details-box">
+              <div class="detail-row">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>Tgl. Komplain: <b>{{ item.report_date | tanggal:'long' }}</b></span>
+              </div>
+              <div class="detail-row">
+                <ion-icon name="call-outline"></ion-icon>
+                <span>No. Kontak: <b>{{ item.reporter_phone }}</b></span>
+              </div>
+            </div>
+
+            <div class="ticket-complaint-box">
+              <span class="complaint-title">Kronologi / Keluhan:</span>
+              <p class="complaint-content">{{ item.complaint }}</p>
+            </div>
+
+            <div class="ticket-photos-section">
+              <div class="photo-column">
+                <span class="photo-heading">Foto Sebelum</span>
+                @if (item.photo_before) {
+                  <div
+                    class="photo-card-wrapper"
+                    (click)="openPreview(item.photo_before, 'Foto Sebelum: ' + item.damage_type)"
+                  >
+                    <img [src]="item.photo_before" alt="Foto sebelum perbaikan" class="photo-img" />
+                    <div class="photo-zoom-overlay">
+                      <ion-icon name="expand-outline"></ion-icon>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="photo-placeholder">
+                    <ion-icon name="image-outline"></ion-icon>
+                    <span>Tidak ada foto</span>
+                  </div>
+                }
+              </div>
+
+              <div class="photo-column">
+                <span class="photo-heading">Foto Sesudah</span>
+                @if (item.photo_after) {
+                  <div
+                    class="photo-card-wrapper"
+                    (click)="openPreview(item.photo_after, 'Foto Sesudah: ' + item.damage_type)"
+                  >
+                    <img [src]="item.photo_after" alt="Foto sesudah perbaikan" class="photo-img" />
+                    <div class="photo-zoom-overlay">
+                      <ion-icon name="expand-outline"></ion-icon>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="photo-placeholder">
+                    <ion-icon name="image-outline"></ion-icon>
+                    <span>Tidak ada foto</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="card-actions it-card-actions">
+              @if (item.status === 'pending') {
+                <ion-button color="primary" size="small" (click)="setStatus(item, 'in_progress')">
+                  <ion-icon name="play-outline" slot="start"></ion-icon>
+                  Mulai Proses
+                </ion-button>
+                <ion-button fill="outline" color="danger" size="small" (click)="setStatus(item, 'rejected')">
+                  Tolak
+                </ion-button>
+              }
+
+              @if (item.status === 'in_progress') {
+                <ion-button color="success" size="small" (click)="setStatus(item, 'resolved')">
+                  <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+                  Tandai Selesai
+                </ion-button>
+                <ion-button fill="outline" color="medium" size="small" (click)="setStatus(item, 'pending')">
+                  Kembalikan
+                </ion-button>
+              }
+
+              @if (item.status === 'resolved' || item.status === 'rejected') {
+                <ion-button fill="outline" color="medium" size="small" (click)="setStatus(item, 'in_progress')">
+                  <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                  Buka Kembali
+                </ion-button>
+              }
+
+              <ion-button fill="outline" color="primary" size="small" (click)="openForm(item)">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                Edit
+              </ion-button>
+
+              <ion-button fill="outline" color="danger" size="small" (click)="remove(item)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <ion-icon [name]="isFilterActive() ? 'filter-circle-outline' : 'construct-outline'"></ion-icon>
+        </div>
+        <h3>{{ isFilterActive() ? 'Tidak Ada Data yang Cocok' : 'Belum Ada Data Komplain IT' }}</h3>
+        <p>
+          {{
+            isFilterActive()
+              ? 'Tidak ada komplain yang cocok dengan kata kunci atau filter status/kategori saat ini.'
+              : 'Klik tombol di bawah ini untuk mencatat komplain atau laporan kerusakan pertama.'
+          }}
+        </p>
+
+        @if (isFilterActive()) {
+          <ion-button fill="outline" color="primary" style="margin-top: 16px;" (click)="resetFilters()">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon>
+            Tampilkan Semua Data
+          </ion-button>
+        } @else {
+          <ion-button color="primary" style="margin-top: 16px;" (click)="openForm()">
+            <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+            Catat Komplain Baru
+          </ion-button>
+        }
+      </div>
+    }
+  </div>
+
+  <ion-modal [isOpen]="modalOpen()" (didDismiss)="modalOpen.set(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ editingId() ? 'Edit Komplain IT' : 'Catat Komplain IT Baru' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modalOpen.set(false)">Tutup</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding">
+        <div class="form-section">Data Pelapor</div>
+
+        <ion-input
+          class="field"
+          label="Nama Pelapor *"
+          labelPlacement="stacked"
+          fill="outline"
+          placeholder="Contoh: Ahmad Fauzi"
+          [(ngModel)]="form.reporter_name"
+        ></ion-input>
+
+        <div class="field-row">
+          <ion-input
+            class="field"
+            label="No. Telepon / WA *"
+            labelPlacement="stacked"
+            fill="outline"
+            type="tel"
+            placeholder="0812xxxxxxxx"
+            [(ngModel)]="form.reporter_phone"
+          ></ion-input>
+
+          <ion-input
+            class="field"
+            label="Departemen *"
+            labelPlacement="stacked"
+            fill="outline"
+            placeholder="Contoh: Keuangan"
+            [(ngModel)]="form.department"
+          ></ion-input>
+        </div>
+
+        <div class="form-section">Detail Kerusakan</div>
+
+        <div class="field-row">
+          <div class="app-form-group">
+            <label class="app-form-label">Tanggal Laporan <span class="required">*</span></label>
+            <div class="app-input-box">
+              <ion-icon name="calendar-outline" class="app-input-icon"></ion-icon>
+              <input type="date" class="app-native-input" [(ngModel)]="form.report_date" />
+            </div>
+          </div>
+
+          <ion-select
+            class="field"
+            label="Kategori *"
+            labelPlacement="stacked"
+            fill="outline"
+            [(ngModel)]="form.category"
+          >
+            <ion-select-option value="hardware">Hardware</ion-select-option>
+            <ion-select-option value="software">Software</ion-select-option>
+          </ion-select>
+        </div>
+
+        <ion-input
+          class="field"
+          label="Jenis Kerusakan *"
+          labelPlacement="stacked"
+          fill="outline"
+          placeholder="Contoh: Printer macet / PC mati total / Windows blue screen"
+          [(ngModel)]="form.damage_type"
+        ></ion-input>
+
+        <ion-textarea
+          class="field"
+          label="Detail Keluhan *"
+          labelPlacement="stacked"
+          fill="outline"
+          [rows]="3"
+          placeholder="Jelaskan kendala yang dialami secara rinci..."
+          [(ngModel)]="form.complaint"
+        ></ion-textarea>
+
+        <ion-select
+          class="field"
+          label="Status Komplain"
+          labelPlacement="stacked"
+          fill="outline"
+          [(ngModel)]="form.status"
+        >
+          <ion-select-option value="pending">Menunggu</ion-select-option>
+          <ion-select-option value="in_progress">Sedang Diproses</ion-select-option>
+          <ion-select-option value="resolved">Selesai Diperbaiki</ion-select-option>
+          <ion-select-option value="rejected">Ditolak</ion-select-option>
+        </ion-select>
+
+        <div class="form-section">Dokumentasi Foto Perbaikan</div>
+
+        <div class="photo-upload-grid">
+          <div class="photo-upload-box">
+            <span class="upload-label">Foto Sebelum</span>
+            <input
+              #beforeFileInput
+              type="file"
+              accept="image/*"
+              hidden
+              (change)="onPhotoSelected($event, 'before')"
+            />
+            @if (form.photo_before) {
+              <div class="upload-img-preview">
+                <img [src]="form.photo_before" alt="Foto sebelum" />
+              </div>
+              <div class="upload-btn-row">
+                <ion-button size="small" fill="outline" (click)="beforeFileInput.click()">Ganti Foto</ion-button>
+                <ion-button size="small" fill="outline" color="danger" (click)="removePhoto('before')">Hapus</ion-button>
+              </div>
+            } @else {
+              <button type="button" class="upload-dropzone" (click)="beforeFileInput.click()">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+                <span>Upload Foto Sebelum</span>
+              </button>
+            }
+          </div>
+
+          <div class="photo-upload-box">
+            <span class="upload-label">Foto Sesudah</span>
+            <input
+              #afterFileInput
+              type="file"
+              accept="image/*"
+              hidden
+              (change)="onPhotoSelected($event, 'after')"
+            />
+            @if (form.photo_after) {
+              <div class="upload-img-preview">
+                <img [src]="form.photo_after" alt="Foto sesudah" />
+              </div>
+              <div class="upload-btn-row">
+                <ion-button size="small" fill="outline" (click)="afterFileInput.click()">Ganti Foto</ion-button>
+                <ion-button size="small" fill="outline" color="danger" (click)="removePhoto('after')">Hapus</ion-button>
+              </div>
+            } @else {
+              <button type="button" class="upload-dropzone" (click)="afterFileInput.click()">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+                <span>Upload Foto Sesudah</span>
+              </button>
+            }
+          </div>
+        </div>
+      </ion-content>
+
+      <ion-footer class="form-footer">
+        <ion-toolbar>
+          <ion-button expand="block" (click)="save()">
+            {{ editingId() ? 'Simpan Perubahan' : 'Simpan Komplain IT' }}
+          </ion-button>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="!!previewImage()" (didDismiss)="previewImage.set(null)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ previewImage()?.title }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="previewImage.set(null)">Tutup</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding" style="--background: #0f172a;">
+        @if (previewImage(); as img) {
+          <div class="image-preview-stage">
+            <img [src]="img.src" [alt]="img.title" class="full-preview-img" />
+          </div>
+        }
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

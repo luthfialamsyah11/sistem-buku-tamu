@@ -16,7 +16,7 @@ export class ProfilePage implements OnInit, ViewWillEnter {
   private ui = inject(UiService);
   readonly auth = inject(AuthService);
 
-  profile = { name: '', email: '', phone: '', department: '' };
+  profile = { nip: '', name: '', phone: '', department: '' };
   pwd = { current_password: '', new_password: '' };
 
   ngOnInit() {
@@ -29,12 +29,31 @@ export class ProfilePage implements OnInit, ViewWillEnter {
     this.auth.refreshUser().then(() => this.syncForm());
   }
 
+  onlyNumbers(event: KeyboardEvent) {
+    const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter'];
+    if (allowed.includes(event.key) || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  sanitizeProfileNip(event?: any) {
+    const raw = event?.target?.value ?? this.profile.nip ?? '';
+    const clean = String(raw).replace(/\D/g, '').slice(0, 6);
+    this.profile.nip = clean;
+    if (event?.target) {
+      event.target.value = clean;
+    }
+  }
+
   private syncForm() {
     const u = this.auth.user();
     if (u) {
       this.profile = {
+        nip: u.nip ?? '',
         name: u.name,
-        email: u.email,
         phone: u.phone ?? '',
         department: u.department ?? '',
       };

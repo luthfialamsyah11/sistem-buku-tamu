@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="has-scroll-filter">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-button
@@ -27,8 +27,14 @@
       }
     </ion-buttons>
   </ion-toolbar>
+</ion-header>
 
-  <ion-toolbar>
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="scroll-filter-section">
     <ion-segment class="app-segment" [value]="activeSegment()"
       (ionChange)="activeSegment.set($any($event).detail.value)">
       <ion-segment-button value="meetings">
@@ -40,15 +46,11 @@
         Ruang Rapat ({{ rooms().length }})
       </ion-segment-button>
     </ion-segment>
-  </ion-toolbar>
 
-  @if (activeSegment() === 'meetings') {
-  <ion-toolbar>
+    @if (activeSegment() === 'meetings') {
     <ion-searchbar class="app-search" placeholder="Cari judul rapat atau ruangan..." [debounce]="50"
       [value]="search()" (ionInput)="search.set($any($event).detail.value || '')"></ion-searchbar>
-  </ion-toolbar>
 
-  <ion-toolbar>
     <div class="filter-bar">
       <input class="date-input" type="date" [value]="dateFilter()" (input)="dateFilter.set($any($event).target.value || '')" />
       @if (dateFilter()) {
@@ -57,39 +59,27 @@
       </ion-button>
       }
     </div>
-  </ion-toolbar>
 
-  <ion-toolbar>
     <ion-segment class="app-segment" [value]="statusFilter()" (ionChange)="statusFilter.set($any($event).detail.value || '')">
       <ion-segment-button value="">Semua</ion-segment-button>
       <ion-segment-button value="pending">Menunggu</ion-segment-button>
       <ion-segment-button value="approved">Disetujui</ion-segment-button>
       <ion-segment-button value="rejected">Ditolak</ion-segment-button>
     </ion-segment>
-  </ion-toolbar>
-  }
+    }
 
-  @if (activeSegment() === 'rooms') {
-  <ion-toolbar>
+    @if (activeSegment() === 'rooms') {
     <ion-searchbar class="app-search" placeholder="Cari nama ruangan, lokasi, fasilitas..." [debounce]="250"
       [(ngModel)]="roomSearchInput" (ionInput)="roomSearch.set(roomSearchInput)"></ion-searchbar>
-  </ion-toolbar>
 
-  <ion-toolbar>
     <ion-segment class="app-segment" [(ngModel)]="roomStatusFilterInput"
       (ionChange)="roomStatusFilter.set(roomStatusFilterInput)">
       <ion-segment-button value="">Semua Status</ion-segment-button>
       <ion-segment-button value="available">Tersedia</ion-segment-button>
       <ion-segment-button value="maintenance">Perbaikan</ion-segment-button>
     </ion-segment>
-  </ion-toolbar>
-  }
-</ion-header>
-
-<ion-content>
-  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+    }
+  </div>
 
   <div class="page-body">
     @if (activeSegment() === 'meetings') {

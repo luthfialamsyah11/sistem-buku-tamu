@@ -1,6 +1,6 @@
 <div class="wa-shell">
   <div
-    class="wa-viewport admin-desktop-full"
+    class="wa-viewport"
     #viewport
     (scroll)="onScroll()"
     (pointerdown)="onPointerDown($event)"
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <nav class="wa-tabbar admin-desktop-hide" aria-label="Menu Navigasi">
+  <nav class="wa-tabbar" aria-label="Menu Navigasi">
     <div class="wa-indicator-track">
       <div class="wa-indicator-bar" [style.transform]="'translateX(' + (activeTab() * 100) + '%)'"></div>
     </div>

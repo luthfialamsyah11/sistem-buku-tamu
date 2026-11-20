@@ -87,6 +87,10 @@ ion-header.header-md {
   border-bottom: 2px solid var(--app-yellow-400);
 }
 
+ion-header.has-scroll-filter {
+  border-bottom: none !important;
+}
+
 ion-title {
   font-size: 18px;
   font-weight: 700;
@@ -194,40 +198,29 @@ ion-segment.app-segment {
   }
 }
 
-ion-tab-bar {
-  --background: #ffffff;
-  --border: 0;
-  border-top: 1px solid var(--app-border);
-  height: 64px;
-  padding-bottom: env(safe-area-inset-bottom);
-
-  ion-tab-button {
-    --color: var(--app-soft);
-    --color-selected: var(--ion-color-primary);
-    font-weight: 600;
-
-    ion-label {
-      font-size: 11px;
-      margin-top: 3px;
-    }
-  }
-}
-
 .page-body {
   box-sizing: border-box;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px 16px 96px;
+  padding: 16px 16px 24px;
   overflow-x: hidden;
 
   @media (min-width: 768px) {
-    padding: 24px 32px 110px;
+    padding: 24px 32px 32px;
   }
 
   @media (min-width: 1024px) {
-    padding: 28px 40px 115px;
+    padding: 28px 40px 40px;
   }
+}
+
+.scroll-filter-section {
+  background: #ffffff;
+  border-bottom: 2px solid var(--app-yellow-400);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 0 10px;
 }
 
 .card-grid {
@@ -264,10 +257,6 @@ ion-tab-bar {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
   }
-}
-
-.empty-state {
-  grid-column: 1 / -1;
 }
 
 .profile-split {
@@ -493,6 +482,7 @@ ion-tab-bar {
 }
 
 .empty-state {
+  grid-column: 1 / -1;
   text-align: center;
   padding: 56px 24px;
   color: var(--app-soft);
@@ -689,13 +679,4 @@ ion-textarea.field {
   }
 }
 
-html.is-desktop-device .wa-tabbar,
-body.is-desktop-device .wa-tabbar {
-  display: none !important;
-}
 
-@media (hover: hover) and (pointer: fine) {
-  .wa-tabbar {
-    display: none !important;
-  }
-}

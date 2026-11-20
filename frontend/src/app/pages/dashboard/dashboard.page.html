@@ -29,7 +29,7 @@
         <div class="min-w-0 flex-1">
           <p class="hero-greet">{{ sapaan }}</p>
           <h2 class="hero-name">{{ auth.user()?.name }}</h2>
-          <p class="hero-dept">{{ auth.user()?.department || 'Staf Internal' }} &bull; {{ auth.user()?.email }}</p>
+          <p class="hero-dept">{{ auth.user()?.department || 'Staf Internal' }} &bull; NIP: {{ auth.user()?.nip }}</p>
         </div>
         <span class="role-pill">{{ auth.user()?.role }}</span>
       </div>

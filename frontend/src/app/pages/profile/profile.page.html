@@ -15,19 +15,23 @@
         <div class="card">
           <ion-input
             class="field"
-            label="Nama Lengkap"
+            label="NIP (Maks. 6 angka)"
             labelPlacement="stacked"
             fill="outline"
-            [(ngModel)]="profile.name"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            [(ngModel)]="profile.nip"
+            (keydown)="onlyNumbers($event)"
+            (ionInput)="sanitizeProfileNip($event)"
           ></ion-input>
 
           <ion-input
             class="field"
-            label="Email"
+            label="Nama Lengkap"
             labelPlacement="stacked"
             fill="outline"
-            type="email"
-            [(ngModel)]="profile.email"
+            [(ngModel)]="profile.name"
           ></ion-input>
 
           <div class="field-row">

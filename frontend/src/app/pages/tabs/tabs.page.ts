@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
+﻿import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular/lazy';
@@ -48,7 +48,7 @@ export class TabsPage implements OnInit, OnDestroy {
   private readonly onResizeSync = () => {
     const el = this.viewportRef?.nativeElement;
     if (!el || el.clientWidth === 0) return;
-    if (typeof window !== 'undefined' && (this.auth.isDesktop || window.innerWidth >= 768)) {
+    if (typeof window !== 'undefined' && this.auth.isDesktop) {
       el.scrollLeft = 0;
       return;
     }
@@ -118,7 +118,7 @@ export class TabsPage implements OnInit, OnDestroy {
     if (index < 0 || index >= this.tabs.length) return;
     this.activeTab.set(index);
 
-    const isDesktop = typeof window !== 'undefined' && (this.auth.isDesktop || window.innerWidth >= 768);
+    const isDesktop = typeof window !== 'undefined' && this.auth.isDesktop;
 
     const el = this.viewportRef?.nativeElement;
     if (el && !isDesktop) {
@@ -142,7 +142,7 @@ export class TabsPage implements OnInit, OnDestroy {
   }
 
   onScroll() {
-    if (typeof window !== 'undefined' && (this.auth.isDesktop || window.innerWidth >= 768)) return;
+    if (typeof window !== 'undefined' && this.auth.isDesktop) return;
     if (this.isProgrammaticScroll || this.isResizing || this.isPointerDown) return;
 
     const el = this.viewportRef?.nativeElement;
@@ -157,7 +157,7 @@ export class TabsPage implements OnInit, OnDestroy {
   }
 
   onPointerDown(e: PointerEvent) {
-    if (typeof window !== 'undefined' && (this.auth.isDesktop || window.innerWidth >= 768)) return;
+    if (typeof window !== 'undefined' && this.auth.isDesktop) return;
     if (e.pointerType !== 'mouse') return;
     const el = this.viewportRef.nativeElement;
     this.isPointerDown = true;

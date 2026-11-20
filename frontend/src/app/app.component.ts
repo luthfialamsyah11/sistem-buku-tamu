@@ -110,6 +110,18 @@ import { SHARED_PIPES } from './shared/pipes';
               </button>
             }
 
+            @if (auth.isAdmin()) {
+              <button
+                type="button"
+                class="ds-nav-item"
+                [class.active]="isActive('/it-support')"
+                (click)="navigateMobile('/it-support')"
+              >
+                <ion-icon name="construct-outline"></ion-icon>
+                <span>IT Support</span>
+              </button>
+            }
+
             <button
               type="button"
               class="ds-nav-item"
@@ -229,6 +241,18 @@ import { SHARED_PIPES } from './shared/pipes';
                   >
                     <ion-icon name="people-circle-outline"></ion-icon>
                     <span>Kelola Pengguna</span>
+                  </button>
+                }
+
+                @if (auth.isAdmin()) {
+                  <button
+                    type="button"
+                    class="ds-nav-item"
+                    [class.active]="isActive('/it-support')"
+                    (click)="navigateDesktop('/it-support')"
+                  >
+                    <ion-icon name="construct-outline"></ion-icon>
+                    <span>IT Support</span>
                   </button>
                 }
 
@@ -547,39 +571,7 @@ import { SHARED_PIPES } from './shared/pipes';
       }
     }
 
-    @media (min-width: 768px) {
-      ion-menu.mobile-admin-menu {
-        display: none !important;
-      }
-
-      .desktop-sidebar {
-        display: block;
-        width: 250px;
-        min-width: 250px;
-        height: 100%;
-        background: #ffffff;
-        border-right: 1px solid var(--app-border, #e2e8f0);
-        box-shadow: 4px 0 24px rgba(15, 23, 42, 0.03);
-        z-index: 100;
-        overflow: hidden;
-        transition: width 0.16s cubic-bezier(0.4, 0, 0.2, 1),
-                    min-width 0.16s cubic-bezier(0.4, 0, 0.2, 1),
-                    border-color 0.16s ease;
-
-        &.collapsed {
-          width: 0;
-          min-width: 0;
-          border-right-color: transparent;
-          box-shadow: none;
-        }
-
-        .ds-inner {
-          width: 250px;
-        }
-      }
-    }
-
-    :host-context(html.is-desktop-device) {
+    @media (min-width: 1024px) {
       ion-menu.mobile-admin-menu {
         display: none !important;
       }

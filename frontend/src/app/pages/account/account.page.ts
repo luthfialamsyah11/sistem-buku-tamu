@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+﻿import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonicModule, MenuController, ViewWillEnter } from '@ionic/angular/lazy';
 import { AuthService } from '../../core/auth.service';
@@ -29,7 +29,7 @@ export class AccountPage implements OnInit, ViewWillEnter {
   }
 
   openMenu() {
-    if (this.auth.isDesktop || (typeof window !== 'undefined' && window.innerWidth >= 768)) {
+    if (this.auth.isDesktop) {
       this.auth.toggleDesktopSidebar();
     } else {
       this.menuCtrl.toggle('admin-menu');

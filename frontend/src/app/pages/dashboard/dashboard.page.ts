@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+﻿import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { IonicModule, MenuController, ViewWillEnter } from '@ionic/angular/lazy';
+import { IonicModule, MenuController } from '@ionic/angular/lazy';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { MEETING_STATUS, VISITOR_STATUS } from '../../core/models';
@@ -25,7 +25,7 @@ export class DashboardPage implements OnInit {
   private lastLoadTime = 0;
 
   openMenu() {
-    if (this.auth.isDesktop || (typeof window !== 'undefined' && window.innerWidth >= 768)) {
+    if (this.auth.isDesktop) {
       this.auth.toggleDesktopSidebar();
     } else {
       this.menuCtrl.toggle('admin-menu');
@@ -47,7 +47,7 @@ export class DashboardPage implements OnInit {
       const res = await this.api.get<any>('/dashboard');
       this.data.set(res.data);
       this.lastLoadTime = Date.now();
-    } catch {} finally {
+    } catch { } finally {
       this.isLoading = false;
     }
   }

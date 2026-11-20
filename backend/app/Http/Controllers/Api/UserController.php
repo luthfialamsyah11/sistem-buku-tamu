@@ -12,8 +12,12 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $users = User::query()
-            ->when($request->search, fn ($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))
-            ->orderBy('name')
+            ->when($request->search, function ($q, $s) {
+                $q->where(fn ($w) => $w->where('name', 'like', "%{$s}%")
+                    ->orWhere('nip', 'like', "%{$s}%")
+                    ->orWhere('department', 'like', "%{$s}%"));
+            })
+            ->orderBy('nip')
             ->get();
 
         return response()->json([
@@ -25,8 +29,8 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'nip' => 'required|string|max:6|regex:/^[0-9]{1,6}$/|unique:users,nip',
             'name' => 'required|string|max:150',
-            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'phone' => 'nullable|string|max:30',
             'department' => 'nullable|string|max:100',
@@ -45,8 +49,8 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
+            'nip' => ['required', 'string', 'max:6', 'regex:/^[0-9]{1,6}$/', Rule::unique('users')->ignore($user->id)],
             'name' => 'required|string|max:150',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|min:6',
             'phone' => 'nullable|string|max:30',
             'department' => 'nullable|string|max:100',
@@ -83,4 +87,3 @@ class UserController extends Controller
         ]);
     }
 }
-

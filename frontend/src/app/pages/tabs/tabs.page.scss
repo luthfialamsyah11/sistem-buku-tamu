@@ -15,12 +15,12 @@
 }
 
 .wa-viewport {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: row;
   width: 100%;
   max-width: 100%;
-  height: calc(100% - 58px);
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
@@ -34,32 +34,10 @@
     display: none;
   }
 
-  @media (min-width: 768px) {
-    &.admin-desktop-full {
-      height: 100%;
-      overflow: hidden !important;
-      scroll-snap-type: none !important;
-      scroll-behavior: auto !important;
-
-      > .wa-slide {
-        display: none;
-        scroll-snap-align: none;
-      }
-
-      > .wa-slide.active-slide {
-        display: flex;
-        flex: 1 1 100%;
-        width: 100%;
-        max-width: 100%;
-      }
-    }
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    height: 100% !important;
-    overflow: hidden !important;
-    scroll-snap-type: none !important;
-    scroll-behavior: auto !important;
+  @media (min-width: 1024px) {
+    overflow: hidden;
+    scroll-snap-type: none;
+    scroll-behavior: auto;
 
     > .wa-slide {
       display: none;
@@ -67,37 +45,10 @@
     }
 
     > .wa-slide.active-slide {
-      display: flex !important;
-      flex: 1 1 100% !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      height: 100% !important;
-    }
-  }
-}
-
-:host-context(html.is-desktop-device) {
-  .wa-tabbar {
-    display: none !important;
-  }
-
-  .wa-viewport {
-    height: 100% !important;
-    overflow: hidden !important;
-    scroll-snap-type: none !important;
-    scroll-behavior: auto !important;
-
-    > .wa-slide {
-      display: none !important;
-      scroll-snap-align: none;
-    }
-
-    > .wa-slide.active-slide {
-      display: flex !important;
-      flex: 1 1 100% !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      height: 100% !important;
+      display: flex;
+      flex: 1 1 100%;
+      width: 100%;
+      max-width: 100%;
     }
   }
 }
@@ -130,36 +81,25 @@
 
 .wa-tabbar {
   position: relative;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  height: 58px;
-  min-height: 58px;
+  width: 100%;
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #ffffff;
   border-top: 1px solid #dfead3;
   box-shadow: 0 -2px 10px rgba(20, 83, 45, 0.05);
   z-index: 1000;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  width: 100%;
   overflow: hidden;
+  box-sizing: border-box;
 
   @media (min-width: 768px) {
-    height: 62px;
-    min-height: 62px;
-    max-width: 600px;
-    margin: 0 auto 14px;
-    border-radius: 20px;
-    border: 1px solid #dfead3;
-    box-shadow: 0 10px 25px -4px rgba(20, 83, 45, 0.16);
+    height: calc(68px + env(safe-area-inset-bottom, 0px));
   }
 
-  @media (min-width: 768px) {
-    &.admin-desktop-hide {
-      display: none !important;
-    }
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    display: none !important;
+  @media (min-width: 1024px) {
+    display: none;
   }
 }
 
@@ -182,7 +122,8 @@
 }
 
 .wa-tab-btn {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -193,6 +134,7 @@
   padding: 4px 0 2px;
   cursor: pointer;
   color: #6b7c6f;
+  font-family: inherit;
   transition: color 0.2s ease, transform 0.15s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -213,14 +155,34 @@
       font-size: 22px;
       transition: transform 0.2s ease;
     }
+
+    @media (min-width: 768px) {
+      width: 56px;
+      height: 32px;
+      border-radius: 16px;
+
+      ion-icon {
+        font-size: 24px;
+      }
+    }
   }
 
   .wa-tab-label {
+    max-width: 100%;
+    padding: 0 2px;
     font-size: 11px;
     font-weight: 500;
     margin-top: 2px;
     letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: font-weight 0.2s ease;
+
+    @media (min-width: 768px) {
+      font-size: 12px;
+      margin-top: 3px;
+    }
   }
 
   &.active {

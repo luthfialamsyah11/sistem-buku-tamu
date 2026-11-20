@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="has-scroll-filter">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/akun"></ion-back-button>
@@ -11,18 +11,19 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
-  <ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="scroll-filter-section">
     <ion-searchbar
       class="app-search"
-      placeholder="Cari nama atau email pengguna..."
+      placeholder="Cari nama, NIP, atau departemen..."
       [debounce]="250"
       [(ngModel)]="search"
       (ionInput)="load()"
     ></ion-searchbar>
-  </ion-toolbar>
-</ion-header>
+  </div>
 
-<ion-content>
   <div class="page-body">
     <div class="card-grid">
       @for (u of users(); track u.id) {
@@ -31,7 +32,7 @@
             <div class="avatar">{{ u.name | initials }}</div>
             <div class="flex-1 min-w-0">
               <h3 class="card-title">{{ u.name }}</h3>
-              <p class="card-subtitle">{{ u.email }}{{ u.phone ? ' &bull; ' + u.phone : '' }}</p>
+              <p class="card-subtitle">NIP: <b>{{ u.nip }}</b> &bull; {{ u.department || 'Staf' }}{{ u.phone ? ' &bull; ' + u.phone : '' }}</p>
             </div>
             <span class="chip" [class]="u.role === 'admin' ? 'primary' : (u.role === 'sekretaris' ? 'warning' : 'success')">
               {{ u.role }}
@@ -75,19 +76,24 @@
       <ion-content class="ion-padding">
         <ion-input
           class="field"
-          label="Nama Lengkap *"
+          label="NIP (Maks. 6 angka) *"
           labelPlacement="stacked"
           fill="outline"
-          [(ngModel)]="form.name"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="Contoh: 100003"
+          [(ngModel)]="form.nip"
+          (keydown)="onlyNumbers($event)"
+          (ionInput)="sanitizeFormNip($event)"
         ></ion-input>
 
         <ion-input
           class="field"
-          label="Email *"
+          label="Nama Lengkap *"
           labelPlacement="stacked"
           fill="outline"
-          type="email"
-          [(ngModel)]="form.email"
+          [(ngModel)]="form.name"
         ></ion-input>
 
         <ion-input

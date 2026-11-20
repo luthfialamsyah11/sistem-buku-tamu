@@ -30,7 +30,7 @@
                 </span>
               </div>
               <p class="card-subtitle" style="margin-top: 4px;">
-                {{ auth.user()?.department || 'Staf Internal' }} &bull; {{ auth.user()?.email }}
+                {{ auth.user()?.department || 'Staf Internal' }} &bull; NIP: {{ auth.user()?.nip }}
               </p>
               <div style="margin-top: 8px;">
                 <span
@@ -68,10 +68,10 @@
 
             <div class="info-row">
               <div class="info-label">
-                <ion-icon name="mail-outline"></ion-icon>
-                <span>Alamat Email</span>
+                <ion-icon name="card-outline"></ion-icon>
+                <span>NIP</span>
               </div>
-              <div class="info-value">{{ auth.user()?.email }}</div>
+              <div class="info-value">{{ auth.user()?.nip || '-' }}</div>
             </div>
 
             <div class="info-row">

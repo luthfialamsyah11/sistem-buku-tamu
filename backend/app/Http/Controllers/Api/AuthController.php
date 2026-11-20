@@ -13,16 +13,16 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'nip' => 'required|string|max:6',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('nip', $request->nip)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Email atau password salah',
+                'message' => 'NIP atau password salah',
             ], 401);
         }
 
@@ -51,8 +51,8 @@ class AuthController extends Controller
         $user = $request->user();
 
         $data = $request->validate([
+            'nip' => ['required', 'string', 'max:6', 'regex:/^[0-9]{1,6}$/', Rule::unique('users')->ignore($user->id)],
             'name' => 'required|string|max:150',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'phone' => 'nullable|string|max:30',
             'department' => 'nullable|string|max:100',
         ]);
